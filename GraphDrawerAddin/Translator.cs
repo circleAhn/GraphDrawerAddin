@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace GraphDrawerAddin
+﻿namespace GraphDrawerAddin
 {
 
     internal class Translator
@@ -12,10 +6,24 @@ namespace GraphDrawerAddin
         public float X { get; }
         public float Y { get; }
 
-        public Translator (float X, float Y)
+        public Translator(float X, float Y)
         {
             this.X = Constants.TRANSLATE_X + X;
             this.Y = Constants.TRANSLATE_Y - Y;
+        }
+    }
+
+    internal class AffineMapper
+    {
+        public float X { get; }
+        public float Y { get; }
+
+        public AffineMapper(float X, float Y)
+        {
+            this.X = (X - Settings.XMin) / (Settings.XMax - Settings.XMin) 
+                * Constants.COORDINATE_HEIGHT * Settings.ZoomProp;
+            this.Y = (Y - Settings.YMin) / (Settings.YMax - Settings.YMin) 
+                * Constants.COORDINATE_WIDTH * Settings.YStretch * Settings.ZoomProp;
         }
     }
 }

@@ -1,6 +1,15 @@
-﻿using System;
-using static AngouriMath.Entity;
+﻿using Microsoft.Office.Tools.Ribbon;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Windows.Forms;
+
 using PowerPoint = Microsoft.Office.Interop.PowerPoint;
+using Office = Microsoft.Office.Core;
+using AngouriMath;
+using static AngouriMath.MathS;
+using static AngouriMath.Entity;
 
 namespace GraphDrawerAddin
 {
@@ -10,8 +19,6 @@ namespace GraphDrawerAddin
         public Variable x;
         public Entity expr;
         private Func<double, float> f;
-
-        private float F(double x) => f(x / Constants.UNIT) * Constants.UNIT;
 
 
         public Drawer(Variable x, Entity expr) => Initializer(x, expr);
@@ -25,12 +32,13 @@ namespace GraphDrawerAddin
             f = expr.Compile<double, float>(x);
         }
 
-        private bool IsOutOfRange(float y) => Constants.COORDINATE_DOWN > y || y > Constants.COORDINATE_UP;
+        private bool IsOutOfRange(float y) => Settings.YMin > y || y > Settings.YMax || float.IsNaN(y);
 
 
         public void Drawing()
         {
-            DrawingCoordinate();
+            if (Settings.IsDrawCoordinate)
+                DrawingCoordinate();
             DrawingGraph();
         }
 
@@ -40,14 +48,19 @@ namespace GraphDrawerAddin
             PowerPoint.Slide activeSlide = Globals.ThisAddIn.Application.ActiveWindow.View.Slide;
 
             // x-axis
-            activeSlide.Shapes
-                .TranslatedAddLine(Constants.COORDINATE_LEFT, 0, Constants.COORDINATE_RIGHT, 0)
-                .Line.ApplyArrowStyleLine();
-
+            if (Settings.XMin * Settings.XMax <= 0)
+            {
+                activeSlide.Shapes
+                    .TransformedAddLine(Settings.XMin, 0, Settings.XMax, 0)
+                    .Line.ApplyArrowStyleLine();
+            }
             // y-axis
-            activeSlide.Shapes
-                .TranslatedAddLine(0, Constants.COORDINATE_DOWN, 0, Constants.COORDINATE_UP)
-                .Line.ApplyArrowStyleLine();
+            if (Settings.YMin * Settings.YMax <= 0)
+            {
+                activeSlide.Shapes
+                    .TransformedAddLine(0, Settings.YMin, 0, Settings.YMax)
+                    .Line.ApplyArrowStyleLine();
+            }
         }
 
         private void DrawingGraph()
@@ -55,23 +68,23 @@ namespace GraphDrawerAddin
             PowerPoint.Slide activeSlide = Globals.ThisAddIn.Application.ActiveWindow.View.Slide;
             PowerPoint.FreeformBuilder curveBuilder = null;
 
-            for (float X = Constants.COORDINATE_LEFT; X <= Constants.COORDINATE_RIGHT; X += (Constants.COORDINATE_RIGHT - Constants.COORDINATE_LEFT) / Constants.PLOT_NUM)
+            for (float X = Settings.XMin; X <= Settings.XMax; X += (Settings.XMax - Settings.XMin) / Settings.Precision)
             {
-                float Y = F(X);
+                float Y = f(X);
 
                 if (IsOutOfRange(Y))
                 {
                     curveBuilder?.ConvertToShape().ApplyBoldStyleGraph();
-                    curveBuilder = curveBuilder != null ? null : curveBuilder;
+                    curveBuilder = null; //curveBuilder != null ? null : curveBuilder;
                     continue;
                 }
 
+                curveBuilder?.TransformedAddNodes(X, Y);
                 if (curveBuilder == null)
                 {
-                    curveBuilder = activeSlide.Shapes.TranslatedBuildFreeform(X, Y);
+                    curveBuilder = activeSlide.Shapes.TransformedBuildFreeform(X, Y);
                 }
 
-                curveBuilder?.TranslatedAddNodes(X, Y);
             }
 
             curveBuilder?.ConvertToShape().ApplyBoldStyleGraph();

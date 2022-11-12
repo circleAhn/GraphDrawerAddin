@@ -34,36 +34,42 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.tab2 = this.Factory.CreateRibbonTab();
+            this.tabGrapX = this.Factory.CreateRibbonTab();
             this.group1 = this.Factory.CreateRibbonGroup();
             this.expressionEditBox = this.Factory.CreateRibbonEditBox();
             this.variableEditBox = this.Factory.CreateRibbonEditBox();
-            this.button1 = this.Factory.CreateRibbonButton();
+            this.graphGeneratorButton = this.Factory.CreateRibbonButton();
             this.group2 = this.Factory.CreateRibbonGroup();
-            this.editBox3 = this.Factory.CreateRibbonEditBox();
-            this.editBox4 = this.Factory.CreateRibbonEditBox();
-            this.checkBox2 = this.Factory.CreateRibbonCheckBox();
+            this.xAxisBoundary = this.Factory.CreateRibbonEditBox();
+            this.yAxisBoundary = this.Factory.CreateRibbonEditBox();
+            this.yBoundaryAutoCheckBox = this.Factory.CreateRibbonCheckBox();
             this.separator2 = this.Factory.CreateRibbonSeparator();
-            this.editBox5 = this.Factory.CreateRibbonEditBox();
-            this.editBox6 = this.Factory.CreateRibbonEditBox();
-            this.checkBox3 = this.Factory.CreateRibbonCheckBox();
-            this.tab2.SuspendLayout();
+            this.zoomSize = this.Factory.CreateRibbonEditBox();
+            this.precision = this.Factory.CreateRibbonEditBox();
+            this.isDrawCoordinateCheckBox = this.Factory.CreateRibbonCheckBox();
+            this.group3 = this.Factory.CreateRibbonGroup();
+            this.drawDerivative = this.Factory.CreateRibbonButton();
+            this.integralConstant = this.Factory.CreateRibbonEditBox();
+            this.drawIntegral = this.Factory.CreateRibbonButton();
+            this.tabGrapX.SuspendLayout();
             this.group1.SuspendLayout();
             this.group2.SuspendLayout();
+            this.group3.SuspendLayout();
             this.SuspendLayout();
             // 
-            // tab2
+            // tabGrapX
             // 
-            this.tab2.Groups.Add(this.group1);
-            this.tab2.Groups.Add(this.group2);
-            this.tab2.Label = "GrapX";
-            this.tab2.Name = "tab2";
+            this.tabGrapX.Groups.Add(this.group1);
+            this.tabGrapX.Groups.Add(this.group2);
+            this.tabGrapX.Groups.Add(this.group3);
+            this.tabGrapX.Label = "GrapX-Addin";
+            this.tabGrapX.Name = "tabGrapX";
             // 
             // group1
             // 
             this.group1.Items.Add(this.expressionEditBox);
             this.group1.Items.Add(this.variableEditBox);
-            this.group1.Items.Add(this.button1);
+            this.group1.Items.Add(this.graphGeneratorButton);
             this.group1.Label = "그래프 생성";
             this.group1.Name = "group1";
             // 
@@ -71,7 +77,7 @@
             // 
             this.expressionEditBox.Label = "수식";
             this.expressionEditBox.Name = "expressionEditBox";
-            this.expressionEditBox.Text = null;
+            this.expressionEditBox.Text = "x";
             // 
             // variableEditBox
             // 
@@ -79,93 +85,128 @@
             this.variableEditBox.Name = "variableEditBox";
             this.variableEditBox.Text = "x";
             // 
-            // button1
+            // graphGeneratorButton
             // 
-            this.button1.Label = "생성하기";
-            this.button1.Name = "button1";
+            this.graphGeneratorButton.Label = "생성하기";
+            this.graphGeneratorButton.Name = "graphGeneratorButton";
+            this.graphGeneratorButton.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.GraphGeneratorButton_Click);
             // 
             // group2
             // 
-            this.group2.Items.Add(this.editBox3);
-            this.group2.Items.Add(this.editBox4);
-            this.group2.Items.Add(this.checkBox2);
+            this.group2.Items.Add(this.xAxisBoundary);
+            this.group2.Items.Add(this.yAxisBoundary);
+            this.group2.Items.Add(this.yBoundaryAutoCheckBox);
             this.group2.Items.Add(this.separator2);
-            this.group2.Items.Add(this.editBox5);
-            this.group2.Items.Add(this.editBox6);
-            this.group2.Items.Add(this.checkBox3);
+            this.group2.Items.Add(this.zoomSize);
+            this.group2.Items.Add(this.precision);
+            this.group2.Items.Add(this.isDrawCoordinateCheckBox);
             this.group2.Label = "그래프 옵션";
             this.group2.Name = "group2";
             // 
-            // editBox3
+            // xAxisBoundary
             // 
-            this.editBox3.Label = "가로축 범위";
-            this.editBox3.Name = "editBox3";
-            this.editBox3.Text = "-2, 2";
+            this.xAxisBoundary.Label = "가로축 범위";
+            this.xAxisBoundary.Name = "xAxisBoundary";
+            this.xAxisBoundary.Text = "-2, 2";
             // 
-            // editBox4
+            // yAxisBoundary
             // 
-            this.editBox4.Label = "세로축 범위";
-            this.editBox4.Name = "editBox4";
-            this.editBox4.Text = "-2, 2";
+            this.yAxisBoundary.Label = "세로축 범위";
+            this.yAxisBoundary.Name = "yAxisBoundary";
+            this.yAxisBoundary.Text = "-2, 2";
             // 
-            // checkBox2
+            // yBoundaryAutoCheckBox
             // 
-            this.checkBox2.Label = "세로축 범위 자동 설정";
-            this.checkBox2.Name = "checkBox2";
+            this.yBoundaryAutoCheckBox.Enabled = false;
+            this.yBoundaryAutoCheckBox.Label = "세로축 범위 자동 설정";
+            this.yBoundaryAutoCheckBox.Name = "yBoundaryAutoCheckBox";
             // 
             // separator2
             // 
             this.separator2.Name = "separator2";
             // 
-            // editBox5
+            // zoomSize
             // 
-            this.editBox5.Label = "가로길이 확대/축소(%)";
-            this.editBox5.Name = "editBox5";
-            this.editBox5.Text = "100";
+            this.zoomSize.Label = "확대/축소(%)";
+            this.zoomSize.Name = "zoomSize";
+            this.zoomSize.Text = "100";
             // 
-            // editBox6
+            // precision
             // 
-            this.editBox6.Label = "세로길이 확대/축소(%)";
-            this.editBox6.Name = "editBox6";
-            this.editBox6.Text = "100";
+            this.precision.Label = "정밀도";
+            this.precision.Name = "precision";
+            this.precision.Text = "50";
             // 
-            // checkBox3
+            // isDrawCoordinateCheckBox
             // 
-            this.checkBox3.Label = "상하좌우 비율 고정";
-            this.checkBox3.Name = "checkBox3";
+            this.isDrawCoordinateCheckBox.Checked = true;
+            this.isDrawCoordinateCheckBox.Label = "좌표평면 그리기";
+            this.isDrawCoordinateCheckBox.Name = "isDrawCoordinateCheckBox";
+            this.isDrawCoordinateCheckBox.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.checkBox1_Click);
+            // 
+            // group3
+            // 
+            this.group3.Items.Add(this.drawDerivative);
+            this.group3.Items.Add(this.integralConstant);
+            this.group3.Items.Add(this.drawIntegral);
+            this.group3.Label = "실험실";
+            this.group3.Name = "group3";
+            // 
+            // drawDerivative
+            // 
+            this.drawDerivative.Label = "미분 함수 그리기";
+            this.drawDerivative.Name = "drawDerivative";
+            this.drawDerivative.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.DrawDerivative_Click);
+            // 
+            // integralConstant
+            // 
+            this.integralConstant.Label = "적분 상수";
+            this.integralConstant.Name = "integralConstant";
+            this.integralConstant.Text = "0";
+            // 
+            // drawIntegral
+            // 
+            this.drawIntegral.Label = "적분 함수 그리기";
+            this.drawIntegral.Name = "drawIntegral";
+            this.drawIntegral.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.DrawIntegral_Click);
             // 
             // GraphDrawer
             // 
             this.Name = "GraphDrawer";
             this.RibbonType = "Microsoft.PowerPoint.Presentation";
-            this.Tabs.Add(this.tab2);
+            this.Tabs.Add(this.tabGrapX);
             this.Load += new Microsoft.Office.Tools.Ribbon.RibbonUIEventHandler(this.GraphDrawer_Load);
-            this.tab2.ResumeLayout(false);
-            this.tab2.PerformLayout();
+            this.tabGrapX.ResumeLayout(false);
+            this.tabGrapX.PerformLayout();
             this.group1.ResumeLayout(false);
             this.group1.PerformLayout();
             this.group2.ResumeLayout(false);
             this.group2.PerformLayout();
+            this.group3.ResumeLayout(false);
+            this.group3.PerformLayout();
             this.ResumeLayout(false);
 
         }
 
         #endregion
 
-        internal Microsoft.Office.Tools.Ribbon.RibbonTab tab2;
+        internal Microsoft.Office.Tools.Ribbon.RibbonTab tabGrapX;
         internal Microsoft.Office.Tools.Ribbon.RibbonGroup group1;
         internal Microsoft.Office.Tools.Ribbon.RibbonEditBox expressionEditBox;
-        internal Microsoft.Office.Tools.Ribbon.RibbonButton graphGeneratorButton;
         internal Microsoft.Office.Tools.Ribbon.RibbonEditBox variableEditBox;
-        internal Microsoft.Office.Tools.Ribbon.RibbonButton button1;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton graphGeneratorButton;
         internal Microsoft.Office.Tools.Ribbon.RibbonGroup group2;
-        internal Microsoft.Office.Tools.Ribbon.RibbonEditBox editBox3;
-        internal Microsoft.Office.Tools.Ribbon.RibbonEditBox editBox4;
-        internal Microsoft.Office.Tools.Ribbon.RibbonCheckBox checkBox2;
+        internal Microsoft.Office.Tools.Ribbon.RibbonEditBox xAxisBoundary;
+        internal Microsoft.Office.Tools.Ribbon.RibbonEditBox yAxisBoundary;
+        internal Microsoft.Office.Tools.Ribbon.RibbonCheckBox yBoundaryAutoCheckBox;
         internal Microsoft.Office.Tools.Ribbon.RibbonSeparator separator2;
-        internal Microsoft.Office.Tools.Ribbon.RibbonEditBox editBox5;
-        internal Microsoft.Office.Tools.Ribbon.RibbonEditBox editBox6;
-        internal Microsoft.Office.Tools.Ribbon.RibbonCheckBox checkBox3;
+        internal Microsoft.Office.Tools.Ribbon.RibbonEditBox zoomSize;
+        internal Microsoft.Office.Tools.Ribbon.RibbonEditBox precision;
+        internal Microsoft.Office.Tools.Ribbon.RibbonGroup group3;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton drawDerivative;
+        internal Microsoft.Office.Tools.Ribbon.RibbonEditBox integralConstant;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton drawIntegral;
+        internal Microsoft.Office.Tools.Ribbon.RibbonCheckBox isDrawCoordinateCheckBox;
     }
 
     partial class ThisRibbonCollection

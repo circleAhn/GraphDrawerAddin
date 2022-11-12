@@ -27,22 +27,26 @@ namespace GraphDrawerAddin
         }
 
 
-        public static PowerPoint.Shape TranslatedAddLine(this PowerPoint.Shapes shapes, float BeginX, float BeginY, float EndX, float EndY)
+        public static PowerPoint.Shape TransformedAddLine(this PowerPoint.Shapes shapes, float BeginX, float BeginY, float EndX, float EndY)
         {
-            Translator begin = new Translator(BeginX, BeginY);
-            Translator end = new Translator(EndX, EndY);
+            AffineMapper Mbegin = new AffineMapper(BeginX, BeginY);
+            Translator begin = new Translator(Mbegin.X, Mbegin.Y);
+            AffineMapper MEnd = new AffineMapper(EndX, EndY);
+            Translator end = new Translator(MEnd.X, MEnd.Y);
             return shapes.AddLine(begin.X, begin.Y, end.X, end.Y);
         }
 
-        public static PowerPoint.FreeformBuilder TranslatedBuildFreeform(this PowerPoint.Shapes shape, float X, float Y)
+        public static PowerPoint.FreeformBuilder TransformedBuildFreeform(this PowerPoint.Shapes shape, float X, float Y)
         {
-            Translator t = new Translator(X, Y);
+            AffineMapper m = new AffineMapper(X, Y);
+            Translator t = new Translator(m.X, m.Y);
             return shape.BuildFreeform(Office.MsoEditingType.msoEditingCorner, t.X, t.Y);
         }
 
-        public static void TranslatedAddNodes(this PowerPoint.FreeformBuilder freeformBuilder, float X, float Y)
+        public static void TransformedAddNodes(this PowerPoint.FreeformBuilder freeformBuilder, float X, float Y)
         {
-            Translator t = new Translator(X, Y);
+            AffineMapper m = new AffineMapper(X, Y);
+            Translator t = new Translator(m.X, m.Y);
             freeformBuilder.AddNodes(Office.MsoSegmentType.msoSegmentCurve,
                                     Office.MsoEditingType.msoEditingAuto,
                                     t.X, t.Y);
