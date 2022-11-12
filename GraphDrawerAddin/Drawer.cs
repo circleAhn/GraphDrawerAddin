@@ -14,7 +14,6 @@ using System.Reflection;
 
 namespace GraphDrawerAddin
 {
-    
 
     internal class Drawer
     {
@@ -35,7 +34,6 @@ namespace GraphDrawerAddin
             this.expr = expr;
             f = expr.Compile<double, float>(x);
         }
-
 
         private bool IsOutOfRange(float y) => Constants.COORDINATE_DOWN > y || y > Constants.COORDINATE_UP;
 

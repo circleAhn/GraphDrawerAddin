@@ -155,6 +155,7 @@
         internal Microsoft.Office.Tools.Ribbon.RibbonTab tab2;
         internal Microsoft.Office.Tools.Ribbon.RibbonGroup group1;
         internal Microsoft.Office.Tools.Ribbon.RibbonEditBox expressionEditBox;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton graphGeneratorButton;
         internal Microsoft.Office.Tools.Ribbon.RibbonEditBox variableEditBox;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton button1;
         internal Microsoft.Office.Tools.Ribbon.RibbonGroup group2;
