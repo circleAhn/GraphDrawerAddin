@@ -42,6 +42,48 @@ namespace GraphDrawerAddin
             DrawingGraph();
         }
 
+        public void Ploting()
+        {
+            PowerPoint.Slide activeSlide = Globals.ThisAddIn.Application.ActiveWindow.View.Slide;
+
+            if ((Settings.XMin <= Settings.DotX) && (Settings.DotX <= Settings.XMax))
+                if ((Settings.YMin <= Settings.DotY) && (Settings.DotY <= Settings.YMax))
+                {
+                    activeSlide.Shapes
+                        .TransformedAddDot(Settings.DotX, Settings.DotY)
+                        .ApplyBoldStyleDot();
+
+                    if (Settings.IsContainsDotLineCheckBox)
+                    {
+                        activeSlide.Shapes
+                            .TransformedAddLine(Settings.DotX, Settings.DotY, Settings.DotX, 0)
+                            .Line.ApplyDashedStyleLine();
+
+                            activeSlide.Shapes
+                                .TransformedAddLine(Settings.DotX, Settings.DotY, 0, Settings.DotY)
+                                .Line.ApplyDashedStyleLine();
+                    }
+
+                }
+        }
+
+        public void DrawingTangentLine()
+        {
+            if (Math.Abs(f(Settings.DotX) - Settings.DotY) < 0.001f)
+            {
+                float m = expr.Differentiate(x).Compile<double, float>(x)(Settings.DotX);
+                float y = f(Settings.DotX);
+                Entity tangent = m.ToString() + " * (x - " + Settings.DotX.ToString() + " ) + " + y.ToString();
+                f = tangent.Compile<double, float>(x);
+                Drawing();
+            }
+            else
+            {
+                throw new Exception("표시된 점이 함수의 접점에 가까이 있지 않은 것 같습니다.");
+            }
+            
+        }
+
 
         private void DrawingCoordinate()
         {
@@ -53,6 +95,11 @@ namespace GraphDrawerAddin
                 activeSlide.Shapes
                     .TransformedAddLine(Settings.XMin, 0, Settings.XMax, 0)
                     .Line.ApplyArrowStyleLine();
+
+                activeSlide.Shapes.TransformedAddTextbox(Settings.XMax, 0, 
+                    Constants.TEXTBOX_WIDTH_PXL, Constants.TEXTBOX_HEIGHT_PXL, 
+                    -20, -7)
+                    .ApplyEquationText("x");
             }
             // y-axis
             if (Settings.YMin * Settings.YMax <= 0)
@@ -60,7 +107,22 @@ namespace GraphDrawerAddin
                 activeSlide.Shapes
                     .TransformedAddLine(0, Settings.YMin, 0, Settings.YMax)
                     .Line.ApplyArrowStyleLine();
+
+                activeSlide.Shapes.TransformedAddTextbox(0, Settings.YMax, 
+                    Constants.TEXTBOX_WIDTH_PXL, Constants.TEXTBOX_HEIGHT_PXL, 
+                    -20, -10)
+                    .ApplyEquationText("y");
             }
+
+            if (Settings.XMin * Settings.XMax <= 0)
+                if (Settings.YMin * Settings.YMax <= 0)
+                {
+                    activeSlide.Shapes.TransformedAddTextbox(0, 0,
+                        Constants.TEXTBOX_WIDTH_PXL, Constants.TEXTBOX_HEIGHT_PXL,
+                        -23, -5)
+                        .ApplyEquationText("O", isItalic: false);
+                }
+
         }
 
         private void DrawingGraph()
@@ -68,7 +130,10 @@ namespace GraphDrawerAddin
             PowerPoint.Slide activeSlide = Globals.ThisAddIn.Application.ActiveWindow.View.Slide;
             PowerPoint.FreeformBuilder curveBuilder = null;
 
-            for (float X = Settings.XMin; X <= Settings.XMax; X += (Settings.XMax - Settings.XMin) / Settings.Precision)
+            float[] XArr = Enumerable.Range(0, Settings.Precision + 1).Select(it => (float)it / Settings.Precision * (Settings.XMax - Settings.XMin) + Settings.XMin).ToArray();
+
+            //for (float X = Settings.XMin; X <= Settings.XMax; X += (Settings.XMax - Settings.XMin) / Settings.Precision)
+            foreach(float X in XArr)
             {
                 float Y = f(X);
 

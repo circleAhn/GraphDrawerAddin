@@ -9,15 +9,23 @@ namespace GraphDrawerAddin
 {
     internal static class Constants
     {
-        public const float COORDINATE_WIDTH = 200f;
-        public const float COORDINATE_HEIGHT = 200f;
-        public const float TRANSLATE_X = 100f;
-        public const float TRANSLATE_Y = 400f;
+        public const float COORDINATE_WIDTH_PXL = 200f;
+        public const float COORDINATE_HEIGHT_PXL = 200f;
+        public const float TRANSLATE_X_PXL = 100f;
+        public const float TRANSLATE_Y_PXL = 400f;
+
+        public const float TEXTBOX_WIDTH_PXL = 20f;
+        public const float TEXTBOX_HEIGHT_PXL = 20f;
+
 
         public const int MAX_PRECISION = 200;
         public const int MIN_PRECISION = 10;
         public const float MAX_RATIO = 2f;
         public const float MIN_RATIO = 0.5f;
+
+        public const float DOT_RADIUS = 2f;
+
+        
 
     }
 
@@ -32,6 +40,15 @@ namespace GraphDrawerAddin
         public static float YStretch { get; set; }
 
         public static bool IsDrawCoordinate { get; set; }
+        public static bool IsYBoundaryAutoCheckBox { get; set; }
+
+        public static float DotX { get; set; }
+        public static float DotY { get; set; }
+
+        public static bool IsContainsDotLineCheckBox { get; set; }
+
+        public static bool IsAlsoDrawDotCheckBox { get; set; }
+
 
 
         private static float zoomProp;
@@ -61,7 +78,7 @@ namespace GraphDrawerAddin
         }
 
 
-        public static void Initialize(float xMin, float xMax, float yMin, float yMax, float zoomProp, int precision, bool isDrawCoordinate)
+        public static void Initialize(float xMin, float xMax, float yMin, float yMax, float zoomProp, int precision, bool isDrawCoordinate, bool isYBoundaryAutoCheckBox)
         {
             XMin = xMin;
             XMax = xMax;
@@ -71,6 +88,15 @@ namespace GraphDrawerAddin
             Precision = precision;
             YStretch = (yMax - yMin) / (XMax - XMin);
             IsDrawCoordinate= isDrawCoordinate;
+            IsYBoundaryAutoCheckBox = isYBoundaryAutoCheckBox;
+        }
+
+        public static void DotInitialize(float dotX, float dotY, bool isContainsDotLineCheckBox, bool isAlsoDrawDotCheckBox)
+        {
+            DotX = dotX;
+            DotY = dotY;
+            IsContainsDotLineCheckBox = isContainsDotLineCheckBox;
+            IsAlsoDrawDotCheckBox = isAlsoDrawDotCheckBox;
         }
     }
 
@@ -78,6 +104,8 @@ namespace GraphDrawerAddin
     {
         public const float LINE_BOLD = 2.0f;
         public const float LINE_REGULAR = 1.0f;
+
+        public const string FONT_NAME = "LM Roman 10";
     }
 
     internal static class Color

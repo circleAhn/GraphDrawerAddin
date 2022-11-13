@@ -190,6 +190,7 @@
     <Compile Include="Constants.cs" />
     <Compile Include="Drawer.cs" />
     <Compile Include="Extension.cs" />
+    <Compile Include="FontSettings.cs" />
     <Compile Include="GraphDrawer.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -212,6 +213,10 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <None Include="fonts\lmroman10-bold.otf" />
+    <None Include="fonts\lmroman10-bolditalic.otf" />
+    <None Include="fonts\lmroman10-italic.otf" />
+    <None Include="fonts\lmroman10-regular.otf" />
     <None Include="GraphDrawerAddin_TemporaryKey.pfx" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
@@ -232,6 +237,9 @@
       <DependentUpon>ThisAddIn.Designer.xml</DependentUpon>
     </Compile>
     <AppDesigner Include="Properties\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="fonts\GUST e-foundry License.txt" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

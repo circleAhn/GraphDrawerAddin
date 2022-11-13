@@ -51,6 +51,7 @@ namespace GraphDrawerAddin
                 float ZoomProp = Convert.ToSingle(zoomSize.Text);
                 int Precision = Convert.ToInt32(precision.Text);
                 bool IsDrawCoordinate = isDrawCoordinateCheckBox.Checked;
+                bool IsYBoundaryAutoCheckBox = isYBoundaryAutoCheckBox.Checked;
 
                 if (ZoomProp > Constants.MAX_RATIO * 100)
                 {
@@ -60,6 +61,11 @@ namespace GraphDrawerAddin
                 {
                     zoomSize.Text = (Constants.MIN_RATIO * 100).ToString();
                 }
+                if (IsYBoundaryAutoCheckBox)
+                {
+                    yAxisBoundary.Text = xAxisBoundary.Text;
+                    YAxisBoundary = BoundaryParser(yAxisBoundary.Text);
+                }
 
                 Settings.Initialize(
                     xMin: XAxisBoundary[0],
@@ -68,7 +74,8 @@ namespace GraphDrawerAddin
                     yMax: YAxisBoundary[1],
                     zoomProp: ZoomProp,
                     precision: Precision,
-                    isDrawCoordinate: IsDrawCoordinate);
+                    isDrawCoordinate: IsDrawCoordinate,
+                    isYBoundaryAutoCheckBox: IsYBoundaryAutoCheckBox);
 
             }
             catch (Exception ex)
@@ -128,9 +135,79 @@ namespace GraphDrawerAddin
             }
         }
 
-        private void checkBox1_Click(object sender, RibbonControlEventArgs e)
+        private void InstallFonts_Click(object sender, RibbonControlEventArgs e)
         {
+            FontSettings.InstallFonts();
+        }
 
+        private void yBoundaryAutoCheckBox_Click(object sender, RibbonControlEventArgs e)
+        {
+            if (isYBoundaryAutoCheckBox.Checked)
+            {
+                yAxisBoundary.Enabled = false;
+                yAxisBoundary.Text = xAxisBoundary.Text;
+            }
+            else
+            {
+                yAxisBoundary.Enabled = true;
+            }
+        }
+
+        private void DrawDot_Click(object sender, RibbonControlEventArgs e)
+        {
+            Initialize();
+
+            try
+            {
+                float[] DotCoordinate = BoundaryParser(dotCoordinate.Text);
+                bool IsContainsDotLineCheckBox = isContainsDotLineCheckBox.Checked;
+                bool IsAlsoDrawDotCheckBox = isAlsoDrawDotCheckBox.Checked;
+
+                Settings.DotInitialize(
+                        dotX: DotCoordinate[0],
+                        dotY: DotCoordinate[1],
+                        isContainsDotLineCheckBox: IsContainsDotLineCheckBox,
+                        isAlsoDrawDotCheckBox: IsAlsoDrawDotCheckBox);
+
+                Variable x = variableEditBox.Text;
+                Entity expr = expressionEditBox.Text;
+                Drawer drawer = new Drawer(x, expr);
+                drawer.Ploting();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("다음 오류가 발생했습니다.\n 정상 작업임에도 반복되면 제작자에게 다음 에러메세지와 함께 문의하세요.\nError: " + ex.Message);
+            }
+        }
+
+        private void DrawTangent_Click(object sender, RibbonControlEventArgs e)
+        {
+            Initialize();
+
+            try
+            {
+                float[] DotCoordinate = BoundaryParser(dotCoordinate.Text);
+                bool IsContainsDotLineCheckBox = isContainsDotLineCheckBox.Checked;
+                bool IsAlsoDrawDotCheckBox = isAlsoDrawDotCheckBox.Checked;
+
+                Settings.DotInitialize(
+                        dotX: DotCoordinate[0],
+                        dotY: DotCoordinate[1],
+                        isContainsDotLineCheckBox: IsContainsDotLineCheckBox,
+                        isAlsoDrawDotCheckBox: IsAlsoDrawDotCheckBox);
+
+                Variable x = variableEditBox.Text;
+                Entity expr = expressionEditBox.Text;
+                Drawer drawer = new Drawer(x, expr);
+                drawer.DrawingTangentLine();
+
+                if (IsAlsoDrawDotCheckBox)
+                    drawer.Ploting();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("다음 오류가 발생했습니다.\n 정상 작업임에도 반복되면 제작자에게 다음 에러메세지와 함께 문의하세요.\nError: " + ex.Message);
+            }
         }
     }
 }
