@@ -31,7 +31,7 @@ namespace GraphDrawerAddin
             try
             {
                 Variable x = variableEditBox.Text;
-                Entity expr = expressionEditBox.Text;
+                Entity expr = LogToLn(expressionEditBox.Text);
                 Drawer drawer = new Drawer(x, expr);
                 drawer.Drawing();
             }
@@ -44,59 +44,40 @@ namespace GraphDrawerAddin
 
         private void Initialize()
         {
-            try
-            {
-                float[] XAxisBoundary = BoundaryParser(xAxisBoundary.Text);
-                float[] YAxisBoundary = BoundaryParser(yAxisBoundary.Text);
-                float ZoomProp = Convert.ToSingle(zoomSize.Text);
-                int Precision = Convert.ToInt32(precision.Text);
-                bool IsDrawCoordinate = isDrawCoordinateCheckBox.Checked;
-                bool IsYBoundaryAutoCheckBox = isYBoundaryAutoCheckBox.Checked;
-
-                if (ZoomProp > Constants.MAX_RATIO * 100)
-                {
-                    zoomSize.Text = (Constants.MAX_RATIO * 100).ToString();
-                }
-                if (ZoomProp < Constants.MIN_RATIO * 100)
-                {
-                    zoomSize.Text = (Constants.MIN_RATIO * 100).ToString();
-                }
-                if (IsYBoundaryAutoCheckBox)
-                {
-                    yAxisBoundary.Text = xAxisBoundary.Text;
-                    YAxisBoundary = BoundaryParser(yAxisBoundary.Text);
-                }
-
-                Settings.Initialize(
-                    xMin: XAxisBoundary[0],
-                    xMax: XAxisBoundary[1],
-                    yMin: YAxisBoundary[0],
-                    yMax: YAxisBoundary[1],
-                    zoomProp: ZoomProp,
-                    precision: Precision,
-                    isDrawCoordinate: IsDrawCoordinate,
-                    isYBoundaryAutoCheckBox: IsYBoundaryAutoCheckBox);
-
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("그래프 옵션의 입력값 오류입니다. 그래프 옵션에서 입력값을 제대로 입력했는지 확인해주세요." +
-                    "\n 정상 작업임에도 반복되면 제작자에게 다음 에러메세지와 함께 문의하세요.\nError: " + ex.Message);
-            }
+            Settings.Initialize(
+                StringToFloatArray(xAxisBoundary.Text),
+                StringToFloatArray(yAxisBoundary.Text),
+                StringToFloatArray(domainBoundary.Text),
+                Convert.ToSingle(zoomSize.Text),
+                Convert.ToInt32(precision.Text),
+                isDrawCoordinateCheckBox.Checked,
+                isYBoundaryAutoCheckBox.Checked,
+                isAccurateSingularPointCheckBox.Checked,
+                isAccurateCriticalPointCheckBox.Checked,
+                Convert.ToInt32(singularPointAccuracy.Text));
         }
 
-        private float[] BoundaryParser(string str)
+        private void DotInitialize()
         {
-            try
+            Settings.DotInitialize(
+                    dot: StringToFloatArray(dotCoordinate.Text),
+                    isContainsDotLineCheckBox: isContainsDotLineCheckBox.Checked,
+                    isAlsoDrawDotCheckBox: isAlsoDrawDotCheckBox.Checked);
+        }
+
+        private string LogToLn(string oldExpr)
+        {
+            Regex logExpr = new Regex(@"(?is)\blog\((?>[^()]|(?<c>)\(|(?<-c>)\))*(?(c)(?!))\)");
+
+            string expr = oldExpr;
+            string newExpr = expr;
+            do
             {
-                float[] boundary = str.ToString().Split(',')
-                    .Select(it => Convert.ToSingle(it.Trim())).ToArray();
-                return new float[] { boundary[0], boundary[1] };
+                expr = newExpr;
+                newExpr = logExpr.Replace(expr, m => $"(ln({m.Value.Substring(3)})/ln(10))");
             }
-            catch
-            {
-                throw new Exception("가로축 및 세로축 범위의 입력 양식은 \"실수, 실수\" (따옴표 제외) 형태입니다. \nex1) -2, 2\nex2) 4.35, 6.78\n");
-            }
+            while (newExpr != expr);
+            return newExpr;
         }
 
         private void DrawDerivative_Click(object sender, RibbonControlEventArgs e)
@@ -122,7 +103,6 @@ namespace GraphDrawerAddin
 
             try
             {
-
                 Variable x = variableEditBox.Text;
                 Entity expr = expressionEditBox.Text;
                 Entity constant = Convert.ToSingle(integralConstant.Text).ToString();
@@ -140,7 +120,7 @@ namespace GraphDrawerAddin
             FontSettings.InstallFonts();
         }
 
-        private void yBoundaryAutoCheckBox_Click(object sender, RibbonControlEventArgs e)
+        private void YBoundaryAutoCheckBox_Click(object sender, RibbonControlEventArgs e)
         {
             if (isYBoundaryAutoCheckBox.Checked)
             {
@@ -156,19 +136,10 @@ namespace GraphDrawerAddin
         private void DrawDot_Click(object sender, RibbonControlEventArgs e)
         {
             Initialize();
+            DotInitialize();
 
             try
             {
-                float[] DotCoordinate = BoundaryParser(dotCoordinate.Text);
-                bool IsContainsDotLineCheckBox = isContainsDotLineCheckBox.Checked;
-                bool IsAlsoDrawDotCheckBox = isAlsoDrawDotCheckBox.Checked;
-
-                Settings.DotInitialize(
-                        dotX: DotCoordinate[0],
-                        dotY: DotCoordinate[1],
-                        isContainsDotLineCheckBox: IsContainsDotLineCheckBox,
-                        isAlsoDrawDotCheckBox: IsAlsoDrawDotCheckBox);
-
                 Variable x = variableEditBox.Text;
                 Entity expr = expressionEditBox.Text;
                 Drawer drawer = new Drawer(x, expr);
@@ -183,31 +154,200 @@ namespace GraphDrawerAddin
         private void DrawTangent_Click(object sender, RibbonControlEventArgs e)
         {
             Initialize();
+            DotInitialize();
 
             try
             {
-                float[] DotCoordinate = BoundaryParser(dotCoordinate.Text);
-                bool IsContainsDotLineCheckBox = isContainsDotLineCheckBox.Checked;
-                bool IsAlsoDrawDotCheckBox = isAlsoDrawDotCheckBox.Checked;
-
-                Settings.DotInitialize(
-                        dotX: DotCoordinate[0],
-                        dotY: DotCoordinate[1],
-                        isContainsDotLineCheckBox: IsContainsDotLineCheckBox,
-                        isAlsoDrawDotCheckBox: IsAlsoDrawDotCheckBox);
-
                 Variable x = variableEditBox.Text;
                 Entity expr = expressionEditBox.Text;
                 Drawer drawer = new Drawer(x, expr);
                 drawer.DrawingTangentLine();
 
-                if (IsAlsoDrawDotCheckBox)
+                if (isAlsoDrawDotCheckBox.Checked)
                     drawer.Ploting();
             }
             catch (Exception ex)
             {
                 MessageBox.Show("다음 오류가 발생했습니다.\n 정상 작업임에도 반복되면 제작자에게 다음 에러메세지와 함께 문의하세요.\nError: " + ex.Message);
             }
+        }
+
+        private float[] StringToFloatArray(string str) => str.ToString().Split(',').Select(it => Convert.ToSingle(it.Trim())).ToArray();
+
+
+        private string BoundaryCheck(string str, string initialValue = Constants.INITIAL_INTERVAL)
+        {
+            try
+            {
+                float[] boundary = StringToFloatArray(str);
+                return $"{boundary[0]}, {boundary[1]}";
+            }
+            catch
+            {
+                MessageBox.Show(ErrorText.COORDINATE);
+                return initialValue;
+            }
+        }
+
+        private string IntegerCheck(string str, string errorText, int initialValue = 0)
+        {
+            try
+            {
+                return Convert.ToInt32(str).ToString();
+            }
+            catch
+            {
+                MessageBox.Show(errorText);
+                return initialValue.ToString();
+            }
+        }
+
+        private string FloatCheck(string str, string errorText, float initialValue = 0f)
+        {
+            try
+            {
+                return Convert.ToSingle(str).ToString();
+            }
+            catch
+            {
+                MessageBox.Show(errorText);
+                return initialValue.ToString();
+            }
+        }
+
+
+
+        private void Precision_TextChanged(object sender, RibbonControlEventArgs e)
+        {
+            precision.Text = IntegerCheck(precision.Text, ErrorText.PRECISION, Constants.INITIAL_PRECISION);
+            precision.Text = Math.Max(Math.Min(Convert.ToInt32(precision.Text), Constants.MAX_PRECISION), Constants.MIN_PRECISION).ToString();
+        }
+
+        private void ZoomSize_TextChanged(object sender, RibbonControlEventArgs e)
+        {
+            float decimalToPercent(float d) => d * 100;
+
+            zoomSize.Text = FloatCheck(zoomSize.Text, ErrorText.ZOOM_RATIO, decimalToPercent(Constants.INITIAL_RATIO));
+            zoomSize.Text = Math.Max(Math.Min(Convert.ToInt32(zoomSize.Text), decimalToPercent(Constants.MAX_RATIO)), decimalToPercent(Constants.MIN_RATIO)).ToString();
+        }
+
+        
+
+
+        private void XAxisBoundary_TextChanged(object sender, RibbonControlEventArgs e)
+        {
+            xAxisBoundary.Text = BoundaryCheck(xAxisBoundary.Text);
+
+            if (isYBoundaryAutoCheckBox.Checked)
+            {
+                yAxisBoundary.Text = xAxisBoundary.Text;
+            }
+            if (isDomainAutoCheckBox.Checked)
+            {
+                domainBoundary.Text = xAxisBoundary.Text;
+            }
+        }
+
+        private void YAxisBoundary_TextChanged(object sender, RibbonControlEventArgs e)
+        {
+            yAxisBoundary.Text = BoundaryCheck(yAxisBoundary.Text);
+        }
+
+        private void DotCoordinate_TextChanged(object sender, RibbonControlEventArgs e)
+        {
+            dotCoordinate.Text = BoundaryCheck(dotCoordinate.Text);
+        }
+
+        private void IntegralConstant_TextChanged(object sender, RibbonControlEventArgs e)
+        {
+            integralConstant.Text = FloatCheck(integralConstant.Text, ErrorText.INTEGRAL_CONSTANT);
+        }
+
+
+        private void SingularPointAccuracy_TextChanged(object sender, RibbonControlEventArgs e)
+        {
+            singularPointAccuracy.Text = IntegerCheck(singularPointAccuracy.Text, ErrorText.SINGULAR_POINT_ACCURACY, Constants.INITIAL_SINGULAR_POINT_ACCURACY);
+            singularPointAccuracy.Text = Math.Max(Math.Min(Convert.ToInt32(singularPointAccuracy.Text), Constants.MAX_SINGULAR_POINT_ACCURACY), Constants.MIN_SINGULAR_POINT_ACCURACY).ToString();
+        }
+
+        private void IsDomainAutoCheckBox_Click(object sender, RibbonControlEventArgs e)
+        {
+            if (isDomainAutoCheckBox.Checked)
+            {
+                domainBoundary.Enabled = false;
+                domainBoundary.Text = xAxisBoundary.Text;
+            }
+            else
+            {
+                domainBoundary.Enabled = true;
+            }
+        }
+
+        private void DomainBoundary_TextChanged(object sender, RibbonControlEventArgs e)
+        {
+            domainBoundary.Text = BoundaryCheck(domainBoundary.Text);
+        }
+
+        private void IsAccurateCriticalPointCheckBox_Click(object sender, RibbonControlEventArgs e)
+        {
+
+        }
+
+        private void IsAccurateSingularPointCheckBox_Click(object sender, RibbonControlEventArgs e)
+        {
+            if (isAccurateSingularPointCheckBox.Checked)
+            {
+                singularPointAccuracy.Enabled = true;
+                singularPointAccuracy.Text = Constants.INITIAL_SINGULAR_POINT_ACCURACY.ToString();
+            }
+            else
+            {
+                singularPointAccuracy.Text = Constants.MIN_SINGULAR_POINT_ACCURACY.ToString();
+                singularPointAccuracy.Enabled = false;
+            }
+        }
+
+        private void IsAllowedDynamicPlotting_Click(object sender, RibbonControlEventArgs e)
+        {
+            if (isAllowedDynamicPlotting.Checked)
+            {
+                isAccurateCriticalPointCheckBox.Enabled = true;
+                isAccurateCriticalPointCheckBox.Checked = true;
+                isOverclocked.Enabled = true;
+            }
+            else
+            {
+                isAccurateCriticalPointCheckBox.Enabled = false;
+                isAccurateCriticalPointCheckBox.Checked = false;
+                isOverclocked.Enabled = false;
+            }
+        }
+
+        private void IsOverclocked_Click(object sender, RibbonControlEventArgs e)
+        {
+            if (isOverclocked.Checked)
+            {
+                precision.Enabled = false;
+                isAccurateSingularPointCheckBox.Enabled = false;
+                singularPointAccuracy.Enabled = false;
+                isAccurateCriticalPointCheckBox.Enabled = false;
+                isAllowedDynamicPlotting.Enabled = false;
+                precision.Text = Constants.OVERCLOCKED_PRECISION.ToString();
+                isAccurateSingularPointCheckBox.Checked = true;
+                isAccurateCriticalPointCheckBox.Checked = false;
+                singularPointAccuracy.Text = Constants.OVERCLOCKED_SINGULAR_POINT_ACCURACY.ToString();
+            }
+            else
+            {
+                precision.Enabled = true;
+                isAccurateSingularPointCheckBox.Enabled = true;
+                singularPointAccuracy.Enabled = true;
+                isAccurateCriticalPointCheckBox.Enabled = true;
+                isAllowedDynamicPlotting.Enabled = true;
+                precision.Text = Constants.INITIAL_PRECISION.ToString();
+                singularPointAccuracy.Text = Constants.INITIAL_SINGULAR_POINT_ACCURACY.ToString();
+            }
+
         }
     }
 }

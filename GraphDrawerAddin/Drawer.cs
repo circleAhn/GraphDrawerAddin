@@ -10,6 +10,9 @@ using Office = Microsoft.Office.Core;
 using AngouriMath;
 using static AngouriMath.MathS;
 using static AngouriMath.Entity;
+using System.Text.RegularExpressions;
+using System.Drawing.Text;
+using System.Linq.Expressions;
 
 namespace GraphDrawerAddin
 {
@@ -25,11 +28,14 @@ namespace GraphDrawerAddin
         public Drawer(Entity expr) => Initializer("x", expr);
 
 
+
+
+
         private void Initializer(Variable x, Entity expr)
         {
             this.x = x;
             this.expr = expr;
-            f = expr.Compile<double, float>(x);
+            f = this.expr.Compile<double, float>(this.x);
         }
 
         private bool IsOutOfRange(float y) => Settings.YMin > y || y > Settings.YMax || float.IsNaN(y);
@@ -125,36 +131,145 @@ namespace GraphDrawerAddin
 
         }
 
+
+
+        private List<Tuple<float, float>> NewtonMethod(List<Tuple<float, float>> XList, float beginX, float endX, bool reverse = false, int recursive = Constants.INITIAL_SINGULAR_POINT_ACCURACY)
+        {
+            if (recursive == 0)
+                return XList;
+
+            float midX = (beginX + endX) / 2;
+            float midY = f(midX);
+
+            if (!IsOutOfRange(midY))
+            {
+                XList.Add(new Tuple<float, float>(midX, midY));
+            }
+
+            if (IsOutOfRange(midY) ^ reverse)
+            {
+                NewtonMethod(XList, midX, endX, reverse, recursive - 1);
+            }
+            else
+            {
+                NewtonMethod(XList, beginX, midX, reverse, recursive - 1);
+            }
+
+            return XList;
+        }
+
+
+        private List<Tuple<float, float>> AddMiddle(List<Tuple<float, float>> XYList, float beginX, float endX, int recursive = Constants.INITIAL_CRITICAL_POINT_ACCURACY)
+        {
+            if (recursive == 0)
+            {
+                return XYList;
+            }
+
+            float beginY = f(beginX);
+            float endY = f(endX);
+            float m = (endY - beginY) / (endX - beginX);
+
+            if (Math.Abs(m) < 0.5f)
+            {
+                float midX = (beginX + endX) / 2;
+                float midY = f(midX);
+                XYList.Add(new Tuple<float, float>(midX, midY));
+                AddMiddle(XYList, beginX, midX, recursive - 1);
+                AddMiddle(XYList, midX, endX, recursive - 1);
+            }
+
+            return XYList;
+        }
+
+
+
         private void DrawingGraph()
         {
             PowerPoint.Slide activeSlide = Globals.ThisAddIn.Application.ActiveWindow.View.Slide;
             PowerPoint.FreeformBuilder curveBuilder = null;
 
             float[] XArr = Enumerable.Range(0, Settings.Precision + 1).Select(it => (float)it / Settings.Precision * (Settings.XMax - Settings.XMin) + Settings.XMin).ToArray();
+            List<List<Tuple<float, float>>> allTupleList = new List<List<Tuple<float, float>>>();
 
-            //for (float X = Settings.XMin; X <= Settings.XMax; X += (Settings.XMax - Settings.XMin) / Settings.Precision)
-            foreach(float X in XArr)
+
+            List<Tuple<float, float>> tupleList = new List<Tuple<float, float>>();
+            foreach (var (X, i) in XArr.Select((value, i) => (value, i)))
             {
+                if (X < Settings.DomainMin)
+                    continue;
+                if (X > Settings.DomainMax)
+                    continue;
+
                 float Y = f(X);
 
-                if (IsOutOfRange(Y))
+                if (i < XArr.Length - 1)
                 {
-                    curveBuilder?.ConvertToShape().ApplyBoldStyleGraph();
-                    curveBuilder = null; //curveBuilder != null ? null : curveBuilder;
-                    continue;
-                }
+                    float XNext = XArr[i + 1];
+                    float YNext = f(XNext);
 
-                curveBuilder?.TransformedAddNodes(X, Y);
-                if (curveBuilder == null)
+                    if (IsOutOfRange(Y))
+                    {
+                        if (Settings.IsAccurateSingularPointCheckBox && !IsOutOfRange(YNext))
+                        {
+                            tupleList.AddRange(NewtonMethod(new List<Tuple<float, float>>(), X, XNext, recursive: Settings.SingularPointAccuracy));
+                        }
+                        else
+                        {
+                            allTupleList.Add(tupleList);
+                            tupleList = new List<Tuple<float, float>>();
+                        }
+                    }
+                    else
+                    {
+                        tupleList.Add(new Tuple<float, float>(X, Y));
+                        if (Settings.IsAccurateCriticalPointCheckBox && !IsOutOfRange(YNext))
+                        {
+                            tupleList.AddRange(AddMiddle(new List<Tuple<float, float>>(), X, XNext));
+                        }
+                        if (Settings.IsAccurateSingularPointCheckBox && IsOutOfRange(YNext))
+                        {
+                            tupleList.AddRange(NewtonMethod(new List<Tuple<float, float>>(), X, XNext, true, Settings.SingularPointAccuracy));
+                        }
+                    }
+                }
+                else
                 {
-                    curveBuilder = activeSlide.Shapes.TransformedBuildFreeform(X, Y);
+                    if (!IsOutOfRange(Y))
+                    {
+                        tupleList.Add(new Tuple<float, float>(X, Y));
+                    }
+                    allTupleList.Add(tupleList.OrderBy(it => it.Item1).ToList());
                 }
 
             }
+            
 
-            curveBuilder?.ConvertToShape().ApplyBoldStyleGraph();
+
+            foreach (List<Tuple<float, float>> tupleLs in allTupleList)
+            {
+                if (tupleLs.Count <= 1)
+                    continue;
+
+                foreach (var (value, i) in tupleLs.Select((value, i) => (value, i)))
+                {
+                    float X = value.Item1;
+                    float Y = value.Item2;
+
+                    if (i == 0)
+                    {
+                        curveBuilder = activeSlide.Shapes.TransformedBuildFreeform(X, Y);
+                    } 
+                    else
+                    {
+                        curveBuilder?.TransformedAddNodes(X, Y);
+                    }
+                }
+
+                curveBuilder?.ConvertToShape().ApplyBoldStyleGraph();
+            }
+
         }
-
 
     }
 }
