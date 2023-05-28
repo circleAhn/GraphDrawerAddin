@@ -4,7 +4,7 @@ An `Microsoft PowerPoint Add-in` that draws a graph of a explicit / differentiat
 
 The form of the design is similar to the image used in the Korean mathematics curriculum; such as svg format got from Geogebra.
 
-![ezgif com-gif-maker_(8)](https://github.com/circleAhn/GraphDrawerAddin/assets/57866999/10b565e7-e7e2-45af-9162-e285a0934154)
+<img src = "https://github.com/circleAhn/GraphDrawerAddin/assets/57866999/f463165b-3442-42e5-9e22-bc6e30d08d29">
 
 
 ## Usage
